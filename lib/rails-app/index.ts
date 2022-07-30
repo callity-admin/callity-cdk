@@ -4,20 +4,23 @@ import { aws_ec2, RemovalPolicy, Stack } from 'aws-cdk-lib';
 import { ApplicationLoadBalancedEc2Service, ApplicationLoadBalancedFargateService } from 'aws-cdk-lib/aws-ecs-patterns';
 import { EcsEc2LaunchTarget } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { AutoScalingGroup } from 'aws-cdk-lib/aws-autoscaling';
-import { InstanceClass, InstanceSize, InstanceType, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { InstanceClass, InstanceSize, InstanceType, IVpc, Vpc } from 'aws-cdk-lib/aws-ec2';
 
 import Ec2Setup from './ec2-setup';
+import { CallityCdkStack } from '../callity-cdk-stack';
 
 export default class RailsApp {
-    private stack: Stack;
+    private stack: CallityCdkStack;
     public repo: ecr.Repository;
     public ecs_service: ApplicationLoadBalancedFargateService;
-    public vpc: Vpc;
+    public vpc: IVpc;
 
-    constructor(stack: Stack){
+    constructor(stack: CallityCdkStack, vpc: IVpc){
         this.stack = stack;
         this.repo = this.createEcrRepo();
-        new Ec2Setup(this.stack, this.repo);
+        this.vpc = vpc;
+
+        new Ec2Setup(this.stack, this.repo, this.vpc);
         // this.ecs_service = this.createEcsService();
     }
 
